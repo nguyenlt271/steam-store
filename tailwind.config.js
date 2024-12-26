@@ -17,9 +17,9 @@ module.exports = {
         sm: 'calc(var(--radius) - 4px)'
       },
       colors: {
-        primaryCustoms: process.env.PRIMARY_COLOR,
-        secondaryCustoms: process.env.SECONDARY_COLOR,
-        thirdCustoms: process.env.THIRD_COLOR,
+        primaryCustoms: '#1f8e5c',
+        secondaryCustoms: '#288c60',
+        thirdCustoms: "#089578",
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
         card: {
@@ -62,23 +62,23 @@ module.exports = {
         }
       },
       backgroundColor: {
-        primary: process.env.PRIMARY_COLOR,
-        secondary: process.env.SECONDARY_COLOR,
-        primaryCustoms: process.env.PRIMARY_BACKGROUND_COLOR,
-        secondaryCustoms: process.env.SECONDARY_BACKGROUND_COLOR,
-        thirdCustoms: process.env.THIRD_BACKGROUND_COLOR
+        primary: "#1f8e5c",
+        secondary: "#288c60",
+        primaryCustoms: "#303030",
+        secondaryCustoms: "#272727",
+        thirdCustoms: "#2d2d2d"
       },
       textColor: {
-        main: process.env.MAIN_TEXT_COLOR,
-        primaryCustoms: process.env.PRIMARY_TEXT_COLOR,
-        secondaryCustoms: process.env.SECONDARY_TEXT_COLOR
+        main: "#1f8e5c",
+        primaryCustoms: "#979797",
+        secondaryCustoms: "#c9c9c9"
       },
       borderColor: {
-        primaryCustoms: process.env.PRIMARY_BORDER_COLOR,
-        checkbox: process.env.CHECKBOX_BORDER_COLOR
+        primaryCustoms: "#272727",
+        checkbox: "#303030"
       },
       ringColor: {
-        primaryCustoms: process.env.PRIMARY_RING_COLOR
+        primaryCustoms: "#1f8e5c"
       }
     }
   },
