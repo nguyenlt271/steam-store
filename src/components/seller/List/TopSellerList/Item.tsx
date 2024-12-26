@@ -1,13 +1,10 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import Avatar from '@/components/common/Avatar';
 import { Card, CardContent } from '@/components/ui/card';
 import { Star } from 'lucide-react';
 import Link from 'next/link';
 
-interface IProps {
-  user: any;
-}
-function Item({ user }: IProps) {
+function Item() {
   return (
     <Card>
       <CardContent className='p-3 pt-3 flex flex-col gap-2 w-40'>

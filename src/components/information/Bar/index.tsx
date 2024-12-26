@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   Activity,
   Book,
@@ -71,27 +72,6 @@ export function GeneralInformationBar() {
           }
         ]
       }
-      // {
-      //   key: 'information',
-      //   items: [
-      //     {
-      //       icon: (
-      //         <Image
-      //           alt='stream-icon'
-      //           src='/steam.svg'
-      //           width={8}
-      //           height={8}
-      //           className='w-4 h-4 text-[rgb(151, 151, 151) / var(--tw-text-opacity, 1)]'
-      //         />
-      //       ),
-      //       title: ' Steam item value sorter'
-      //     },
-      //     {
-      //       icon: <img src='/steam.svg' alt='' />,
-      //       title: ' Top up steam balance'
-      //     },
-      //   ]
-      // }
     ],
     []
   );
@@ -100,9 +80,9 @@ export function GeneralInformationBar() {
     <div className='flex flex-col gap-2 w-full'>
       <Command className='p-1 rounded-lg bg-secondaryCustoms unset max-h-full'>
         <CommandList className='max-h-full'>
-          {navs.map((item, idx) => (
+          {navs.map((item: any, idx) => (
             <CommandGroup key={item.key} heading={item?.heading}>
-              {item.items.map((navItem, index) => (
+              {item.items.map((navItem: any, index: number) => (
                 <React.Fragment key={index}>
                   <CommandItem>
                     {navItem.icon}

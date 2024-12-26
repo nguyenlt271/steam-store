@@ -26,6 +26,22 @@ export const labels = [
   {
     key: 'year',
     label: 'Year ago'
+  },
+  {
+    key: 'nomatter',
+    label: 'No Matter'
+  },
+  {
+    key: '-1',
+    label: '12 hours'
+  },
+  {
+    key: '0',
+    label: '24 hours'
+  },
+  {
+    key: '1',
+    label: '3 days'
   }
 ];
 

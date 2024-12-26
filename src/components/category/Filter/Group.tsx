@@ -1,39 +1,57 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React from 'react';
-import Item from './Item';
-import { IParams } from '@/variables/interface';
+import React from "react";
+import Item from "./Item";
+import { IParams } from "@/variables/interface";
 
 interface IProps {
-  subItem: {
+  headItem?: {
     param: IParams;
     attribute: any;
   };
-  mainItem: {
+  subItem?: {
     param: IParams;
     attribute: any;
   };
-  label: string;
+  mainItem?: {
+    param: IParams;
+    attribute: any;
+  };
+  label?: string;
 }
-export const GroupInput = ({ subItem, mainItem, label }: IProps) => {
+export const GroupInput = ({ headItem, subItem, mainItem, label }: IProps) => {
   return (
-    <div className='flex flex-col gap-2 w-full'>
-      {label && <p className='text-primaryCustoms font-bold'>{label}</p>}
-      <div className='flex items-center gap-2 w-full'>
-        <div className='w-2/5'>
-          <Item
-            params={subItem?.param}
-            {...subItem?.attribute}
-            className='bg-secondaryCustoms'
-          />
+    <div className="flex flex-col gap-2">
+      {label && <p className="text-primaryCustoms font-semibold">{label}</p>}
+      {headItem && (
+        <div className="flex items-center gap-2 w-full">
+          <div className="w-full">
+            <Item
+              params={headItem?.param}
+              {...headItem?.attribute}
+              className="bg-secondaryCustoms"
+            />
+          </div>
         </div>
-        <div className='w-3/5'>
-          <Item
-            params={mainItem?.param}
-            {...mainItem?.attribute}
-            className='bg-secondaryCustoms'
-          />
+      )}
+
+      {subItem && mainItem && (
+        <div className="flex items-center gap-2 w-full">
+          <div className="w-2/5">
+            <Item
+              params={subItem?.param}
+              {...subItem?.attribute}
+              className="bg-secondaryCustoms"
+            />
+          </div>
+          <div className="w-3/5">
+            <Item
+              params={mainItem?.param}
+              {...mainItem?.attribute}
+              className="bg-secondaryCustoms"
+            />
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

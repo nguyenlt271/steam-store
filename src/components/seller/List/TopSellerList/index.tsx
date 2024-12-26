@@ -10,7 +10,7 @@ function TopSellerList() {
       </h3>
       <div className='flex gap-4 overflow-y-auto max-w-[calc(1076px - 240px)]'>
         {[1, 2, 3, 4, 5].map((user: any, index) => (
-          <Item key={user?.user_id || index} user={user} />
+          <Item key={user?.user_id || index} />
         ))}
       </div>
     </div>

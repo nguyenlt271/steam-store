@@ -18,14 +18,14 @@ function NotLoggedNotification() {
             <X size={18} />
           </Tooltip>
         </CardTitle>
-        <CardDescription className='flex gap-1 text-secondaryCustoms mb-4'>
+        <CardDescription className='flex gap-1 text-secondaryCustoms'>
           <p>
             To gain access to all sections of the forum and valuable information
-            -{' '}
+            - <Link href='/auth/login' className='font-semibold hover:underline'>
+              register at this link
+            </Link>
           </p>
-          <Link href='/auth/login' className='font-semibold hover:underline'>
-            register at this link
-          </Link>
+
         </CardDescription>
       </CardHeader>
     </Card>

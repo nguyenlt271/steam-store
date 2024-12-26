@@ -1,17 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React from 'react';
-
 import {
-  Select as SelectProvider,
   SelectContent,
   SelectGroup,
   SelectItem,
   SelectLabel,
+  Select as SelectProvider,
   SelectTrigger,
-  SelectValue
-} from '@/components/ui/select';
-import { IOption } from '@/variables/interface';
-import CONSTANT from '@/variables/constant';
+  SelectValue,
+} from "@/components/ui/select";
+import CONSTANT from "@/variables/constant";
+import { IOption } from "@/variables/interface";
+import { uniqueId } from "lodash";
 
 interface IProps {
   label: string;
@@ -26,22 +25,25 @@ function Select({ label, options, ...props }: IProps) {
     const item = CONSTANT.LABEL?.find((option) => option?.key === value);
     return item?.label || value;
   };
+
   return (
     <SelectProvider onValueChange={props.onChange} value={props.value}>
       <SelectTrigger className={`w-full ${props?.className}`}>
-        <SelectValue placeholder={label || ''} />
+        <SelectValue placeholder={label || ""} />
       </SelectTrigger>
       <SelectContent>
         <SelectGroup>
           <SelectLabel>{label}</SelectLabel>
-          {options?.map((option) => (
-            <SelectItem
-              key={option?.value || option}
-              value={option?.value || option}
-            >
-              {getLabel(option?.value || option)}
-            </SelectItem>
-          ))}
+          {options?.map((option) => {
+            return (
+              <SelectItem
+                key={option?.value || option || uniqueId()}
+                value={option?.value || option || "none"}
+              >
+                {getLabel(option?.label || option?.value || option)}
+              </SelectItem>
+            );
+          })}
         </SelectGroup>
       </SelectContent>
     </SelectProvider>

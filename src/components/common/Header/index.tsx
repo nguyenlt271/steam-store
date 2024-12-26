@@ -1,12 +1,13 @@
-import React from 'react'
-import HeaderLg from './HeaderLg'
+import HeaderLg from './HeaderLg';
+import HeaderSm from './HeaderSm';
 
 function Header() {
   return (
     <div>
       <HeaderLg />
+      <HeaderSm />
     </div>
-  )
+  );
 }
 
-export default Header
+export default Header;
