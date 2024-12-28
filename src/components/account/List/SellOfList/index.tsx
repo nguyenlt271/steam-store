@@ -3,14 +3,14 @@
 /* eslint-disable @next/next/no-img-element */
 'use client';
 
-import React, { useEffect } from 'react';
-import Item from './Item';
-import { Button } from '@/components/ui/button';
-import { LoaderCircle, RotateCw } from 'lucide-react';
 import Pagination from '@/components/common/Pagination';
+import { Button } from '@/components/ui/button';
 import { useCategory } from '@/lib/context/CategoryContext';
 import axios from 'axios';
 import { uniqueId } from 'lodash';
+import { LoaderCircle, RotateCw } from 'lucide-react';
+import { useEffect } from 'react';
+import Item from './Item';
 
 const SellOfList = () => {
   const {
@@ -23,12 +23,11 @@ const SellOfList = () => {
     onChangeCommon,
   }: any = useCategory();
 
-
   const getData = async (queries: any) => {
     try {
       onChangeCommon({ loading: true });
       const res = await axios.get(`http://localhost:3000/api/accounts`, {
-        params: queries
+        params: queries,
       });
       setAccounts(res?.data?.items);
       setCommonAccount({
@@ -45,16 +44,16 @@ const SellOfList = () => {
 
   const onPageChange = (page: number) => {
     setCommonAccount((prev: any) => ({ ...prev, page }));
-  }
+  };
 
   useEffect(() => {
     const params = {
       ...queries,
-      page: commonAccount?.page
-    }
-    if (queries.game) params.game = [queries.game]
+      page: commonAccount?.page,
+    };
+    if (queries.game) params.game = [queries.game];
     getData(params);
-  }, [queries, commonAccount]);
+  }, [queries, commonAccount?.page]);
 
   return (
     <div className='flex flex-col gap-4'>
@@ -86,16 +85,14 @@ const SellOfList = () => {
           </div>
         </div>
       </div>
-      {
-        common?.loading && (
-          <div className='flex items-center justify-center w-full gap-2'>
-            <span>
-              <LoaderCircle className='animate-spin' />
-            </span>
-            Loading
-          </div>
-        )
-      }
+      {common?.loading && (
+        <div className='flex items-center justify-center w-full gap-2'>
+          <span>
+            <LoaderCircle className='animate-spin' />
+          </span>
+          Loading
+        </div>
+      )}
       <div className='flex flex-col gap-4'>
         {accounts.map((account: any) => (
           <Item key={account?.account_id || uniqueId()} account={account} />

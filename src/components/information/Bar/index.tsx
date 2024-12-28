@@ -9,7 +9,7 @@ import {
   Flag,
   Settings,
   ThumbsUp,
-  TrendingUp
+  TrendingUp,
 } from 'lucide-react';
 
 import {
@@ -17,7 +17,7 @@ import {
   CommandGroup,
   CommandItem,
   CommandList,
-  CommandSeparator
+  CommandSeparator,
 } from '@/components/ui/command';
 import React from 'react';
 
@@ -29,49 +29,49 @@ export function GeneralInformationBar() {
         items: [
           {
             icon: <Book />,
-            title: ' Rules and guarantee'
+            title: ' Rules and guarantee',
           },
           {
             icon: <CircleHelp />,
-            title: ' Advices & Guides'
+            title: ' Advices & Guides',
           },
           {
             icon: <Settings />,
-            title: ' Market settings'
+            title: ' Market settings',
           },
           {
             icon: <TrendingUp />,
-            title: ' Account Upgrades'
+            title: ' Account Upgrades',
           },
           {
             icon: <DollarSign />,
             title: ' Currency Exchange Rates',
-            separator: true
-          }
-        ]
+            separator: true,
+          },
+        ],
       },
       {
         key: 'features',
         items: [
           {
             icon: <Activity />,
-            title: ' New features'
+            title: ' New features',
           },
           {
             icon: <Flag />,
-            title: ' Report a bug'
+            title: ' Report a bug',
           },
           {
             icon: <ThumbsUp />,
-            title: ' Suggest an idea'
+            title: ' Suggest an idea',
           },
           {
             icon: <Code />,
             title: ' API Access',
-            separator: true
-          }
-        ]
-      }
+            separator: true,
+          },
+        ],
+      },
     ],
     []
   );

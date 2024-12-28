@@ -1,17 +1,19 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @next/next/no-img-element */
 'use client';
 
 import Button from '@/components/common/Button';
-import { initQueries, useCategory } from '@/lib/context/CategoryContext';
+import { useCategory } from '@/lib/context/CategoryContext';
 import CONSTANT from '@/variables/constant';
 import { IGame } from '@/variables/interface';
 import * as _ from 'lodash';
-import { ChevronDown, ChevronUp, DollarSign, LoaderCircle, X } from 'lucide-react';
-import { useState } from 'react';
-import GameList from '../List/GameList';
+import { ChevronDown, ChevronUp, DollarSign, LoaderCircle } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { useDebounceCallback } from 'usehooks-ts';
 import { GroupInput } from './Group';
 import Item from './Item';
+import { medals } from '@/variables/constant/params';
 
 function CategoryFilter() {
   const {
@@ -19,16 +21,28 @@ function CategoryFilter() {
     games,
     queries,
     common,
-    onChangeQueries,
     commonAccount,
+    onChangeQueries,
+    onChangeCommon,
   }: any = useCategory();
 
   const [appState, setAppState] = useState({
     showFilter: false,
   });
+  const [tempQueries, setTempQueries] = useState(queries);
+  const debounced = useDebounceCallback((temp) => {
+    if (JSON.stringify(temp) !== JSON.stringify(queries)) onChangeQueries(temp);
+  }, 2000);
+
+  const debouncedQueries = useCallback(debounced, []);
 
   const onChangeAppState = (obj: any) => {
     setAppState((prev) => ({ ...prev, ...obj }));
+  };
+
+  const onChangeTempQueries = (obj: any) => {
+    onChangeCommon({ loading: true });
+    setTempQueries((prev: any) => ({ ...prev, ...obj }));
   };
 
   const onToggleFilterItemAction = () => {
@@ -41,7 +55,8 @@ function CategoryFilter() {
     let param: any = [...data?.params, ...data?.base_params]?.find(
       (item) => item?.name === name
     );
-    if (name === CONSTANT.PARAMS.GAME) param = { ...param, values: onGetGameOptions() }
+    if ([CONSTANT.PARAMS.GAME, CONSTANT.PARAMS.INV_GAME].includes(name))
+      param = { ...param, values: onGetGameOptions() };
     return param;
   };
 
@@ -49,23 +64,23 @@ function CategoryFilter() {
     return _.compact(names.map((name) => getParamByName(name)));
   };
 
-  const onResetActionClick = () => {
-    onChangeQueries(() => initQueries);
-  };
-
   const onOrderByActionClick = (value: string) => {
-    onChangeQueries({ orderBy: value });
-  }
+    onChangeTempQueries({ orderBy: value });
+  };
 
   const getOrderByFilters = () => {
     return [
-      { label: 'Default', value: "" },
+      { label: 'Default', value: '' },
       { label: 'Cheap First', value: 'price_to_up' },
       { label: 'Expensive first', value: 'price_to_down' },
     ].map((item) => {
-      const active = queries[CONSTANT.PARAMS.ORDER_BY] === item?.value;
+      const active = tempQueries[CONSTANT.PARAMS.ORDER_BY] === item?.value;
       return (
-        <Button key={item?.value} variant={active ? 'default' : 'secondary'} onClick={() => onOrderByActionClick(item?.value)}>
+        <Button
+          key={item?.value}
+          variant={active ? 'default' : 'secondary'}
+          onClick={() => onOrderByActionClick(item?.value)}
+        >
           {item?.label}
         </Button>
       );
@@ -78,10 +93,13 @@ function CategoryFilter() {
         label: game?.title,
         value: game?.app_id,
       };
-    })
-    return options
-  }
+    });
+    return options;
+  };
 
+  useEffect(() => {
+    debouncedQueries(tempQueries);
+  }, [tempQueries]);
 
   return (
     <div className='flex flex-col gap-4'>
@@ -100,7 +118,6 @@ function CategoryFilter() {
         </div>
       </div>
       <div className='flex flex-col'>
-        <GameList />
         <div className='p-2 bg-secondaryCustoms rounded-md'>
           <div className='flex flex-col lg:flex-row gap-2 w-full'>
             <div className='flex flex-col gap-2 lg:gap-4 flex-shrink-0 w-full lg:w-2/5 overflow-hidden'>
@@ -108,19 +125,19 @@ function CategoryFilter() {
                 <Item
                   params={getParamByName(CONSTANT.PARAMS.PMIN)}
                   icon={<DollarSign size={16} />}
-                  key={_.uniqueId()}
-                  value={queries[CONSTANT.PARAMS.PMIN] as any}
+                  key={CONSTANT.PARAMS.PMIN}
+                  value={tempQueries[CONSTANT.PARAMS.PMIN] as any}
                   onChange={(e) => {
-                    onChangeQueries({ [CONSTANT.PARAMS.PMIN]: e });
+                    onChangeTempQueries({ [CONSTANT.PARAMS.PMIN]: e });
                   }}
                 />
                 <Item
                   params={getParamByName(CONSTANT.PARAMS.PMAX)}
                   icon={<DollarSign size={16} />}
-                  key={_.uniqueId()}
-                  value={queries[CONSTANT.PARAMS.PMIN] as any}
+                  key={CONSTANT.PARAMS.PMAX}
+                  value={tempQueries[CONSTANT.PARAMS.PMAX] as any}
                   onChange={(e) => {
-                    onChangeQueries({ [CONSTANT.PARAMS.PMIN]: e });
+                    onChangeTempQueries({ [CONSTANT.PARAMS.PMAX]: e });
                   }}
                 />
               </div>
@@ -129,33 +146,33 @@ function CategoryFilter() {
                   CONSTANT.PARAMS.GAME,
                   ...(appState?.showFilter
                     ? [
-                      CONSTANT.PARAMS.EMAIL_TYPE,
-                      CONSTANT.PARAMS.ITEM_DOMAIN,
-                      CONSTANT.PARAMS.NOT_ITEM_DOMAIN,
-                      CONSTANT.PARAMS.EMAIL_PROVIDER,
-                      CONSTANT.PARAMS.NOT_EMAIL_PROVIDER,
-                      CONSTANT.PARAMS.NSB,
-                      CONSTANT.PARAMS.SB,
-                      CONSTANT.PARAMS.NSB_BY_ME,
-                      CONSTANT.PARAMS.SB_BY_ME,
-                    ]
+                        CONSTANT.PARAMS.EMAIL_TYPE,
+                        CONSTANT.PARAMS.ITEM_DOMAIN,
+                        CONSTANT.PARAMS.NOT_ITEM_DOMAIN,
+                        CONSTANT.PARAMS.EMAIL_PROVIDER,
+                        CONSTANT.PARAMS.NOT_EMAIL_PROVIDER,
+                        CONSTANT.PARAMS.NSB,
+                        CONSTANT.PARAMS.SB,
+                        CONSTANT.PARAMS.NSB_BY_ME,
+                        CONSTANT.PARAMS.SB_BY_ME,
+                      ]
                     : []),
-                ]).map((item) => (
-                  <Item
-                    key={_.uniqueId()}
-                    params={item as any}
-                    value={queries[item?.name] as any}
-                    onChange={(e) => {
-                      onChangeQueries({ [item?.name]: e });
-                    }}
-                  />
-                ))}
+                ]).map((item, index: number) => {
+                  return (
+                    <Item
+                      key={item?.name || index}
+                      params={item as any}
+                      value={tempQueries[item?.name] as any}
+                      onChange={(e) => {
+                        onChangeTempQueries({ [item?.name]: e });
+                      }}
+                    />
+                  );
+                })}
                 {appState.showFilter && (
                   <div>
                     <div className='grid grid-cols-2 gap-2'>
                       {getParamsByNames([
-                        CONSTANT.PARAMS.PMIN,
-                        CONSTANT.PARAMS.PMAX,
                         CONSTANT.PARAMS.LMIN,
                         CONSTANT.PARAMS.LMAX,
                         CONSTANT.PARAMS.FRIENDS_MIN,
@@ -164,13 +181,13 @@ function CategoryFilter() {
                         CONSTANT.PARAMS.GMAX,
                         CONSTANT.PARAMS.RELEVANT_GMIN,
                         CONSTANT.PARAMS.RELEVANT_GMAX,
-                      ]).map((item) => (
+                      ]).map((item, index: number) => (
                         <Item
-                          key={_.uniqueId()}
+                          key={item?.name || index}
                           params={item as any}
-                          value={queries[item?.name] as any}
+                          value={tempQueries[item?.name] as any}
                           onChange={(e) => {
-                            onChangeQueries({ [item?.name]: e });
+                            onChangeTempQueries({ [item?.name]: e });
                           }}
                         />
                       ))}
@@ -183,10 +200,10 @@ function CategoryFilter() {
               <div className='w-full'>
                 <Item
                   params={getParamByName(CONSTANT.PARAMS.TITLE)}
-                  key={_.uniqueId()}
-                  value={queries[CONSTANT.PARAMS.TITLE] as any}
+                  key={CONSTANT.PARAMS.TITLE}
+                  value={tempQueries[CONSTANT.PARAMS.TITLE] as any}
                   onChange={(e) => {
-                    onChangeQueries({ [CONSTANT.PARAMS.TITLE]: e });
+                    onChangeTempQueries({ [CONSTANT.PARAMS.TITLE]: e });
                   }}
                 />
               </div>
@@ -197,14 +214,14 @@ function CategoryFilter() {
                     CONSTANT.PARAMS.NOT_COUNTRY,
                     CONSTANT.PARAMS.DAYBREAK,
                     CONSTANT.PARAMS.EG,
-                  ]).map((item) => {
+                  ]).map((item, index: number) => {
                     return (
                       <Item
-                        key={_.uniqueId()}
+                        key={item?.name || index}
                         params={item as any}
-                        value={queries[item?.name] as any}
+                        value={tempQueries[item?.name] as any}
                         onChange={(e) => {
-                          onChangeQueries({ [item?.name]: e });
+                          onChangeTempQueries({ [item?.name]: e });
                         }}
                       />
                     );
@@ -220,11 +237,11 @@ function CategoryFilter() {
                                 CONSTANT.PARAMS.LAST_TRANS_DATE
                               ),
                               attribute: {
-                                value: queries[
+                                value: tempQueries[
                                   CONSTANT.PARAMS.LAST_TRANS_DATE
                                 ] as any,
                                 onChange: (e: any) => {
-                                  onChangeQueries({
+                                  onChangeTempQueries({
                                     [CONSTANT.PARAMS.LAST_TRANS_DATE]: e,
                                   });
                                 },
@@ -235,11 +252,11 @@ function CategoryFilter() {
                                 CONSTANT.PARAMS.LAST_TRANS_DATE_PERIOD
                               ),
                               attribute: {
-                                value: queries[
+                                value: tempQueries[
                                   CONSTANT.PARAMS.LAST_TRANS_DATE_PERIOD
                                 ] as any,
                                 onChange: (e: any) => {
-                                  onChangeQueries({
+                                  onChangeTempQueries({
                                     [CONSTANT.PARAMS.LAST_TRANS_DATE_PERIOD]: e,
                                   });
                                 },
@@ -253,11 +270,11 @@ function CategoryFilter() {
                                 CONSTANT.PARAMS.LAST_TRANS_DATE_LATER
                               ),
                               attribute: {
-                                value: queries[
+                                value: tempQueries[
                                   CONSTANT.PARAMS.LAST_TRANS_DATE_LATER
                                 ] as any,
                                 onChange: (e: any) => {
-                                  onChangeQueries({
+                                  onChangeTempQueries({
                                     [CONSTANT.PARAMS.LAST_TRANS_DATE_LATER]: e,
                                   });
                                 },
@@ -268,11 +285,11 @@ function CategoryFilter() {
                                 CONSTANT.PARAMS.LAST_TRANS_DATE_PERIOD_LATER
                               ),
                               attribute: {
-                                value: queries[
+                                value: tempQueries[
                                   CONSTANT.PARAMS.LAST_TRANS_DATE_PERIOD_LATER
                                 ] as any,
                                 onChange: (e: any) => {
-                                  onChangeQueries({
+                                  onChangeTempQueries({
                                     [CONSTANT.PARAMS
                                       .LAST_TRANS_DATE_PERIOD_LATER]: e,
                                   });
@@ -280,19 +297,19 @@ function CategoryFilter() {
                               },
                             },
                           },
-                        ].map((item) => (
-                          <GroupInput key={_.uniqueId()} {...item} />
+                        ].map((item, index: number) => (
+                          <GroupInput key={item.label || index} {...item} />
                         ))}
                         {getParamsByNames([
                           CONSTANT.PARAMS.NO_TRANS,
                           CONSTANT.PARAMS.TRANS,
-                        ]).map((item) => (
+                        ]).map((item, index: number) => (
                           <Item
-                            key={_.uniqueId()}
+                            key={item?.name || index}
                             params={item as any}
-                            value={queries[item?.name] as any}
+                            value={tempQueries[item?.name] as any}
                             onChange={(e) => {
-                              onChangeQueries({ [item?.name]: e });
+                              onChangeTempQueries({ [item?.name]: e });
                             }}
                           />
                         ))}
@@ -304,11 +321,11 @@ function CategoryFilter() {
                                 CONSTANT.PARAMS.GAMES_PURCHASE_MIN
                               ),
                               attribute: {
-                                value: queries[
+                                value: tempQueries[
                                   CONSTANT.PARAMS.GAMES_PURCHASE_MIN
                                 ] as any,
                                 onChange: (e: any) => {
-                                  onChangeQueries({
+                                  onChangeTempQueries({
                                     [CONSTANT.PARAMS.GAMES_PURCHASE_MIN]: e,
                                   });
                                 },
@@ -319,11 +336,11 @@ function CategoryFilter() {
                                 CONSTANT.PARAMS.GAMES_PURCHASE_MAX
                               ),
                               attribute: {
-                                value: queries[
+                                value: tempQueries[
                                   CONSTANT.PARAMS.GAMES_PURCHASE_MAX
                                 ] as any,
                                 onChange: (e: any) => {
-                                  onChangeQueries({
+                                  onChangeTempQueries({
                                     [CONSTANT.PARAMS.GAMES_PURCHASE_MAX]: e,
                                   });
                                 },
@@ -336,11 +353,11 @@ function CategoryFilter() {
                                 CONSTANT.PARAMS.REFUNDS_PURCHASE_MIN
                               ),
                               attribute: {
-                                value: queries[
+                                value: tempQueries[
                                   CONSTANT.PARAMS.REFUNDS_PURCHASE_MIN
                                 ] as any,
                                 onChange: (e: any) => {
-                                  onChangeQueries({
+                                  onChangeTempQueries({
                                     [CONSTANT.PARAMS.REFUNDS_PURCHASE_MIN]: e,
                                   });
                                 },
@@ -351,11 +368,11 @@ function CategoryFilter() {
                                 CONSTANT.PARAMS.REFUNDS_PURCHASE_MAX
                               ),
                               attribute: {
-                                value: queries[
+                                value: tempQueries[
                                   CONSTANT.PARAMS.REFUNDS_PURCHASE_MAX
                                 ] as any,
                                 onChange: (e: any) => {
-                                  onChangeQueries({
+                                  onChangeTempQueries({
                                     [CONSTANT.PARAMS.REFUNDS_PURCHASE_MAX]: e,
                                   });
                                 },
@@ -369,11 +386,11 @@ function CategoryFilter() {
                                 CONSTANT.PARAMS.INGAME_PURCHASE_MIN
                               ),
                               attribute: {
-                                value: queries[
+                                value: tempQueries[
                                   CONSTANT.PARAMS.INGAME_PURCHASE_MIN
                                 ] as any,
                                 onChange: (e: any) => {
-                                  onChangeQueries({
+                                  onChangeTempQueries({
                                     [CONSTANT.PARAMS.INGAME_PURCHASE_MIN]: e,
                                   });
                                 },
@@ -384,11 +401,11 @@ function CategoryFilter() {
                                 CONSTANT.PARAMS.INGAME_PURCHASE_MAX
                               ),
                               attribute: {
-                                value: queries[
+                                value: tempQueries[
                                   CONSTANT.PARAMS.INGAME_PURCHASE_MAX
                                 ] as any,
                                 onChange: (e: any) => {
-                                  onChangeQueries({
+                                  onChangeTempQueries({
                                     [CONSTANT.PARAMS.INGAME_PURCHASE_MAX]: e,
                                   });
                                 },
@@ -399,30 +416,30 @@ function CategoryFilter() {
                             label: 'Purchased games from',
                             subItem: {
                               param: getParamByName(
-                                CONSTANT.PARAMS.GAMES_PURCHASE_MIN
+                                CONSTANT.PARAMS.GIFTS_PURCHASE_MIN
                               ),
                               attribute: {
-                                value: queries[
-                                  CONSTANT.PARAMS.GAMES_PURCHASE_MIN
+                                value: tempQueries[
+                                  CONSTANT.PARAMS.GIFTS_PURCHASE_MIN
                                 ] as any,
                                 onChange: (e: any) => {
-                                  onChangeQueries({
-                                    [CONSTANT.PARAMS.GAMES_PURCHASE_MIN]: e,
+                                  onChangeTempQueries({
+                                    [CONSTANT.PARAMS.GIFTS_PURCHASE_MIN]: e,
                                   });
                                 },
                               },
                             },
                             mainItem: {
                               param: getParamByName(
-                                CONSTANT.PARAMS.GAMES_PURCHASE_MAX
+                                CONSTANT.PARAMS.GIFTS_PURCHASE_MAX
                               ),
                               attribute: {
-                                value: queries[
-                                  CONSTANT.PARAMS.GAMES_PURCHASE_MAX
+                                value: tempQueries[
+                                  CONSTANT.PARAMS.GIFTS_PURCHASE_MAX
                                 ] as any,
                                 onChange: (e: any) => {
-                                  onChangeQueries({
-                                    [CONSTANT.PARAMS.GAMES_PURCHASE_MAX]: e,
+                                  onChangeTempQueries({
+                                    [CONSTANT.PARAMS.GIFTS_PURCHASE_MAX]: e,
                                   });
                                 },
                               },
@@ -435,11 +452,11 @@ function CategoryFilter() {
                                 CONSTANT.PARAMS.PURCHASE_MIN
                               ),
                               attribute: {
-                                value: queries[
+                                value: tempQueries[
                                   CONSTANT.PARAMS.PURCHASE_MIN
                                 ] as any,
                                 onChange: (e: any) => {
-                                  onChangeQueries({
+                                  onChangeTempQueries({
                                     [CONSTANT.PARAMS.PURCHASE_MIN]: e,
                                   });
                                 },
@@ -450,19 +467,19 @@ function CategoryFilter() {
                                 CONSTANT.PARAMS.PURCHASE_MAX
                               ),
                               attribute: {
-                                value: queries[
+                                value: tempQueries[
                                   CONSTANT.PARAMS.PURCHASE_MAX
                                 ] as any,
                                 onChange: (e: any) => {
-                                  onChangeQueries({
+                                  onChangeTempQueries({
                                     [CONSTANT.PARAMS.PURCHASE_MAX]: e,
                                   });
                                 },
                               },
                             },
                           },
-                        ].map((item) => (
-                          <GroupInput key={_.uniqueId()} {...item} />
+                        ].map((item, index: number) => (
+                          <GroupInput key={item?.label || index} {...item} />
                         ))}
                       </div>
                       <div className='flex flex-col gap-4 p-2 rounded-md bg-primaryCustoms'>
@@ -472,9 +489,11 @@ function CategoryFilter() {
                             headItem: {
                               param: getParamByName(CONSTANT.PARAMS.MAFILE),
                               attribute: {
-                                value: queries[CONSTANT.PARAMS.MAFILE] as any,
+                                value: tempQueries[
+                                  CONSTANT.PARAMS.MAFILE
+                                ] as any,
                                 onChange: (e: any) => {
-                                  onChangeQueries({
+                                  onChangeTempQueries({
                                     [CONSTANT.PARAMS.MAFILE]: e,
                                   });
                                 },
@@ -486,9 +505,11 @@ function CategoryFilter() {
                             headItem: {
                               param: getParamByName(CONSTANT.PARAMS.LIMIT),
                               attribute: {
-                                value: queries[CONSTANT.PARAMS.LIMIT] as any,
+                                value: tempQueries[
+                                  CONSTANT.PARAMS.LIMIT
+                                ] as any,
                                 onChange: (e: any) => {
-                                  onChangeQueries({
+                                  onChangeTempQueries({
                                     [CONSTANT.PARAMS.LIMIT]: e,
                                   });
                                 },
@@ -500,9 +521,9 @@ function CategoryFilter() {
                             headItem: {
                               param: getParamByName(CONSTANT.PARAMS.RT),
                               attribute: {
-                                value: queries[CONSTANT.PARAMS.RT] as any,
+                                value: tempQueries[CONSTANT.PARAMS.RT] as any,
                                 onChange: (e: any) => {
-                                  onChangeQueries({
+                                  onChangeTempQueries({
                                     [CONSTANT.PARAMS.RT]: e,
                                   });
                                 },
@@ -514,11 +535,11 @@ function CategoryFilter() {
                             headItem: {
                               param: getParamByName(CONSTANT.PARAMS.TRADE_BAN),
                               attribute: {
-                                value: queries[
+                                value: tempQueries[
                                   CONSTANT.PARAMS.TRADE_BAN
                                 ] as any,
                                 onChange: (e: any) => {
-                                  onChangeQueries({
+                                  onChangeTempQueries({
                                     [CONSTANT.PARAMS.TRADE_BAN]: e,
                                   });
                                 },
@@ -532,11 +553,11 @@ function CategoryFilter() {
                                 CONSTANT.PARAMS.TRADE_LIMIT
                               ),
                               attribute: {
-                                value: queries[
+                                value: tempQueries[
                                   CONSTANT.PARAMS.TRADE_LIMIT
                                 ] as any,
                                 onChange: (e: any) => {
-                                  onChangeQueries({
+                                  onChangeTempQueries({
                                     [CONSTANT.PARAMS.TRADE_LIMIT]: e,
                                   });
                                 },
@@ -548,11 +569,11 @@ function CategoryFilter() {
                             subItem: {
                               param: getParamByName(CONSTANT.PARAMS.CARDS_MIN),
                               attribute: {
-                                value: queries[
+                                value: tempQueries[
                                   CONSTANT.PARAMS.CARDS_MIN
                                 ] as any,
                                 onChange: (e: any) => {
-                                  onChangeQueries({
+                                  onChangeTempQueries({
                                     [CONSTANT.PARAMS.CARDS_MIN]: e,
                                   });
                                 },
@@ -561,11 +582,11 @@ function CategoryFilter() {
                             mainItem: {
                               param: getParamByName(CONSTANT.PARAMS.CARDS_MAX),
                               attribute: {
-                                value: queries[
+                                value: tempQueries[
                                   CONSTANT.PARAMS.CARDS_MAX
                                 ] as any,
                                 onChange: (e: any) => {
-                                  onChangeQueries({
+                                  onChangeTempQueries({
                                     [CONSTANT.PARAMS.CARDS_MAX]: e,
                                   });
                                 },
@@ -579,11 +600,11 @@ function CategoryFilter() {
                                 CONSTANT.PARAMS.CARDS_GAMES_MIN
                               ),
                               attribute: {
-                                value: queries[
+                                value: tempQueries[
                                   CONSTANT.PARAMS.CARDS_GAMES_MIN
                                 ] as any,
                                 onChange: (e: any) => {
-                                  onChangeQueries({
+                                  onChangeTempQueries({
                                     [CONSTANT.PARAMS.CARDS_GAMES_MIN]: e,
                                   });
                                 },
@@ -594,11 +615,11 @@ function CategoryFilter() {
                                 CONSTANT.PARAMS.CARDS_GAMES_MAX
                               ),
                               attribute: {
-                                value: queries[
+                                value: tempQueries[
                                   CONSTANT.PARAMS.CARDS_GAMES_MAX
                                 ] as any,
                                 onChange: (e: any) => {
-                                  onChangeQueries({
+                                  onChangeTempQueries({
                                     [CONSTANT.PARAMS.CARDS_GAMES_MAX]: e,
                                   });
                                 },
@@ -612,30 +633,30 @@ function CategoryFilter() {
                                 CONSTANT.PARAMS.HAS_ACTIVATED_KEYS
                               ),
                               attribute: {
-                                value: queries[
+                                value: tempQueries[
                                   CONSTANT.PARAMS.HAS_ACTIVATED_KEYS
                                 ] as any,
                                 onChange: (e: any) => {
-                                  onChangeQueries({
+                                  onChangeTempQueries({
                                     [CONSTANT.PARAMS.HAS_ACTIVATED_KEYS]: e,
                                   });
                                 },
                               },
                             },
                           },
-                        ].map((item) => (
-                          <GroupInput key={_.uniqueId()} {...item} />
+                        ].map((item, index: number) => (
+                          <GroupInput key={item?.label || index} {...item} />
                         ))}
                         {getParamsByNames([
                           CONSTANT.PARAMS.VAC_SKIP_GAME_CHECK,
                           CONSTANT.PARAMS.NO_VAC,
-                        ]).map((item) => (
+                        ]).map((item, index: number) => (
                           <Item
-                            key={_.uniqueId()}
+                            key={item?.name || index}
                             params={item as any}
-                            value={queries[item?.name] as any}
+                            value={tempQueries[item?.name] as any}
                             onChange={(e) => {
-                              onChangeQueries({ [item?.name]: e });
+                              onChangeTempQueries({ [item?.name]: e });
                             }}
                             className='bg-secondaryCustoms'
                           />
@@ -658,8 +679,8 @@ function CategoryFilter() {
                               attribute: null,
                             },
                           },
-                        ].map((item) => (
-                          <GroupInput key={_.uniqueId()} {...item} />
+                        ].map((item, index: number) => (
+                          <GroupInput key={item?.label || index} {...item} />
                         ))}
                       </div>
                       <div className='flex flex-col gap-4 p-2 rounded-md bg-primaryCustoms'>
@@ -669,9 +690,11 @@ function CategoryFilter() {
                             subItem: {
                               param: getParamByName(CONSTANT.PARAMS.GIFT_MIN),
                               attribute: {
-                                value: queries[CONSTANT.PARAMS.GIFT_MIN] as any,
+                                value: tempQueries[
+                                  CONSTANT.PARAMS.GIFT_MIN
+                                ] as any,
                                 onChange: (e: any) => {
-                                  onChangeQueries({
+                                  onChangeTempQueries({
                                     [CONSTANT.PARAMS.GIFT_MIN]: e,
                                   });
                                 },
@@ -680,17 +703,19 @@ function CategoryFilter() {
                             mainItem: {
                               param: getParamByName(CONSTANT.PARAMS.GIFT_MAX),
                               attribute: {
-                                value: queries[CONSTANT.PARAMS.GIFT_MAX] as any,
+                                value: tempQueries[
+                                  CONSTANT.PARAMS.GIFT_MAX
+                                ] as any,
                                 onChange: (e: any) => {
-                                  onChangeQueries({
+                                  onChangeTempQueries({
                                     [CONSTANT.PARAMS.GIFT_MAX]: e,
                                   });
                                 },
                               },
                             },
                           },
-                        ].map((item) => (
-                          <GroupInput key={_.uniqueId()} {...item} />
+                        ].map((item, index: number) => (
+                          <GroupInput key={item?.label || index} {...item} />
                         ))}
                       </div>
                     </>
@@ -707,9 +732,9 @@ function CategoryFilter() {
                             input: 'array',
                           },
                           attribute: {
-                            value: queries[CONSTANT.PARAMS.INV_GAME] as any,
+                            value: tempQueries[CONSTANT.PARAMS.INV_GAME] as any,
                             onChange: (e: any) => {
-                              onChangeQueries({
+                              onChangeTempQueries({
                                 [CONSTANT.PARAMS.INV_GAME]: e,
                               });
                             },
@@ -718,9 +743,9 @@ function CategoryFilter() {
                         subItem: {
                           param: getParamByName(CONSTANT.PARAMS.INV_MIN),
                           attribute: {
-                            value: queries[CONSTANT.PARAMS.INV_MIN] as any,
+                            value: tempQueries[CONSTANT.PARAMS.INV_MIN] as any,
                             onChange: (e: any) => {
-                              onChangeQueries({
+                              onChangeTempQueries({
                                 [CONSTANT.PARAMS.INV_MIN]: e,
                               });
                             },
@@ -729,37 +754,43 @@ function CategoryFilter() {
                         mainItem: {
                           param: getParamByName(CONSTANT.PARAMS.INV_MAX),
                           attribute: {
-                            value: queries[CONSTANT.PARAMS.INV_MAX] as any,
+                            value: tempQueries[CONSTANT.PARAMS.INV_MAX] as any,
                             onChange: (e: any) => {
-                              onChangeQueries({
+                              onChangeTempQueries({
                                 [CONSTANT.PARAMS.INV_MAX]: e,
                               });
                             },
                           },
                         },
                       },
-                    ].map((item) => (
-                      <GroupInput key={item?.label} {...item} />
-                    ))}
+                    ].map((item, index: number) => {
+                      return (
+                        <GroupInput key={item?.label || index} {...item} />
+                      );
+                    })}
                   </div>
                   <div className='flex items-center gap-2 w-full'>
                     <div className='w-2/5'>
                       <Item
                         params={getParamByName(CONSTANT.PARAMS.BALANCE_MIN)}
-                        key={_.uniqueId()}
-                        value={queries[CONSTANT.PARAMS.BALANCE_MIN] as any}
+                        key={CONSTANT.PARAMS.BALANCE_MIN}
+                        value={tempQueries[CONSTANT.PARAMS.BALANCE_MIN] as any}
                         onChange={(e) => {
-                          onChangeQueries({ [CONSTANT.PARAMS.BALANCE_MIN]: e });
+                          onChangeTempQueries({
+                            [CONSTANT.PARAMS.BALANCE_MIN]: e,
+                          });
                         }}
                       />
                     </div>
                     <div className='w-3/5'>
                       <Item
                         params={getParamByName(CONSTANT.PARAMS.BALANCE_MAX)}
-                        key={_.uniqueId()}
-                        value={queries[CONSTANT.PARAMS.BALANCE_MIN] as any}
+                        key={CONSTANT.PARAMS.BALANCE_MAX}
+                        value={tempQueries[CONSTANT.PARAMS.BALANCE_MAX] as any}
                         onChange={(e) => {
-                          onChangeQueries({ [CONSTANT.PARAMS.BALANCE_MIN]: e });
+                          onChangeTempQueries({
+                            [CONSTANT.PARAMS.BALANCE_MAX]: e,
+                          });
                         }}
                       />
                     </div>
@@ -773,9 +804,9 @@ function CategoryFilter() {
                             subItem: {
                               param: getParamByName(CONSTANT.PARAMS.REG),
                               attribute: {
-                                value: queries[CONSTANT.PARAMS.REG] as any,
+                                value: tempQueries[CONSTANT.PARAMS.REG] as any,
                                 onChange: (e: any) => {
-                                  onChangeQueries({
+                                  onChangeTempQueries({
                                     [CONSTANT.PARAMS.REG]: e,
                                   });
                                 },
@@ -784,19 +815,19 @@ function CategoryFilter() {
                             mainItem: {
                               param: getParamByName(CONSTANT.PARAMS.REG_PERIOD),
                               attribute: {
-                                value: queries[
+                                value: tempQueries[
                                   CONSTANT.PARAMS.REG_PERIOD
                                 ] as any,
                                 onChange: (e: any) => {
-                                  onChangeQueries({
+                                  onChangeTempQueries({
                                     [CONSTANT.PARAMS.REG_PERIOD]: e,
                                   });
                                 },
                               },
                             },
                           },
-                        ].map((item) => (
-                          <GroupInput key={item?.label} {...item} />
+                        ].map((item, index: number) => (
+                          <GroupInput key={item?.label || index} {...item} />
                         ))}
                       </div>
                       <div className='flex flex-col gap-4 rounded-md p-2 bg-primaryCustoms'>
@@ -808,11 +839,11 @@ function CategoryFilter() {
                                 CONSTANT.PARAMS.WIN_COUNT_MIN
                               ),
                               attribute: {
-                                value: queries[
+                                value: tempQueries[
                                   CONSTANT.PARAMS.WIN_COUNT_MIN
                                 ] as any,
                                 onChange: (e: any) => {
-                                  onChangeQueries({
+                                  onChangeTempQueries({
                                     [CONSTANT.PARAMS.WIN_COUNT_MIN]: e,
                                   });
                                 },
@@ -823,11 +854,11 @@ function CategoryFilter() {
                                 CONSTANT.PARAMS.WIN_COUNT_MAX
                               ),
                               attribute: {
-                                value: queries[
+                                value: tempQueries[
                                   CONSTANT.PARAMS.WIN_COUNT_MAX
                                 ] as any,
                                 onChange: (e: any) => {
-                                  onChangeQueries({
+                                  onChangeTempQueries({
                                     [CONSTANT.PARAMS.WIN_COUNT_MAX]: e,
                                   });
                                 },
@@ -839,9 +870,11 @@ function CategoryFilter() {
                             subItem: {
                               param: getParamByName(CONSTANT.PARAMS.ELO_MIN),
                               attribute: {
-                                value: queries[CONSTANT.PARAMS.ELO_MIN] as any,
+                                value: tempQueries[
+                                  CONSTANT.PARAMS.ELO_MIN
+                                ] as any,
                                 onChange: (e: any) => {
-                                  onChangeQueries({
+                                  onChangeTempQueries({
                                     [CONSTANT.PARAMS.ELO_MIN]: e,
                                   });
                                 },
@@ -850,9 +883,11 @@ function CategoryFilter() {
                             mainItem: {
                               param: getParamByName(CONSTANT.PARAMS.ELO_MAX),
                               attribute: {
-                                value: queries[CONSTANT.PARAMS.ELO_MAX] as any,
+                                value: tempQueries[
+                                  CONSTANT.PARAMS.ELO_MAX
+                                ] as any,
                                 onChange: (e: any) => {
-                                  onChangeQueries({
+                                  onChangeTempQueries({
                                     [CONSTANT.PARAMS.ELO_MAX]: e,
                                   });
                                 },
@@ -866,11 +901,11 @@ function CategoryFilter() {
                                 CONSTANT.PARAMS.CS2_MAP_RANK
                               ),
                               attribute: {
-                                value: queries[
+                                value: tempQueries[
                                   CONSTANT.PARAMS.CS2_MAP_RANK
                                 ] as any,
                                 onChange: (e: any) => {
-                                  onChangeQueries({
+                                  onChangeTempQueries({
                                     [CONSTANT.PARAMS.CS2_MAP_RANK]: e,
                                   });
                                 },
@@ -881,11 +916,11 @@ function CategoryFilter() {
                                 CONSTANT.PARAMS.CS2_MAP_RMIN
                               ),
                               attribute: {
-                                value: queries[
+                                value: tempQueries[
                                   CONSTANT.PARAMS.CS2_MAP_RMIN
                                 ] as any,
                                 onChange: (e: any) => {
-                                  onChangeQueries({
+                                  onChangeTempQueries({
                                     [CONSTANT.PARAMS.CS2_MAP_RMIN]: e,
                                   });
                                 },
@@ -896,11 +931,11 @@ function CategoryFilter() {
                                 CONSTANT.PARAMS.CS2_MAP_RMAX
                               ),
                               attribute: {
-                                value: queries[
+                                value: tempQueries[
                                   CONSTANT.PARAMS.CS2_MAP_RMAX
                                 ] as any,
                                 onChange: (e: any) => {
-                                  onChangeQueries({
+                                  onChangeTempQueries({
                                     [CONSTANT.PARAMS.CS2_MAP_RMAX]: e,
                                   });
                                 },
@@ -914,11 +949,11 @@ function CategoryFilter() {
                                 CONSTANT.PARAMS.WINGMAN_RMIN
                               ),
                               attribute: {
-                                value: queries[
+                                value: tempQueries[
                                   CONSTANT.PARAMS.WINGMAN_RMIN
                                 ] as any,
                                 onChange: (e: any) => {
-                                  onChangeQueries({
+                                  onChangeTempQueries({
                                     [CONSTANT.PARAMS.WINGMAN_RMIN]: e,
                                   });
                                 },
@@ -929,19 +964,19 @@ function CategoryFilter() {
                                 CONSTANT.PARAMS.WINGMAN_RMAX
                               ),
                               attribute: {
-                                value: queries[
+                                value: tempQueries[
                                   CONSTANT.PARAMS.WINGMAN_RMAX
                                 ] as any,
                                 onChange: (e: any) => {
-                                  onChangeQueries({
+                                  onChangeTempQueries({
                                     [CONSTANT.PARAMS.WINGMAN_RMAX]: e,
                                   });
                                 },
                               },
                             },
                           },
-                        ].map((item) => (
-                          <GroupInput key={item?.label} {...item} />
+                        ].map((item, index: number) => (
+                          <GroupInput key={item?.label || index} {...item} />
                         ))}
                       </div>
                       <div className='flex flex-col gap-2 rounded-md p-2 bg-primaryCustoms'>
@@ -953,11 +988,11 @@ function CategoryFilter() {
                                 CONSTANT.PARAMS.CS2_PROFILE_RANK_MIN
                               ),
                               attribute: {
-                                value: queries[
+                                value: tempQueries[
                                   CONSTANT.PARAMS.CS2_PROFILE_RANK_MIN
                                 ] as any,
                                 onChange: (e: any) => {
-                                  onChangeQueries({
+                                  onChangeTempQueries({
                                     [CONSTANT.PARAMS.CS2_PROFILE_RANK_MIN]: e,
                                   });
                                 },
@@ -968,11 +1003,11 @@ function CategoryFilter() {
                                 CONSTANT.PARAMS.CS2_PROFILE_RANK_MAX
                               ),
                               attribute: {
-                                value: queries[
+                                value: tempQueries[
                                   CONSTANT.PARAMS.CS2_PROFILE_RANK_MAX
                                 ] as any,
                                 onChange: (e: any) => {
-                                  onChangeQueries({
+                                  onChangeTempQueries({
                                     [CONSTANT.PARAMS.CS2_PROFILE_RANK_MAX]: e,
                                   });
                                 },
@@ -983,11 +1018,11 @@ function CategoryFilter() {
                             subItem: {
                               param: getParamByName(CONSTANT.PARAMS.MEDAL_MIN),
                               attribute: {
-                                value: queries[
+                                value: tempQueries[
                                   CONSTANT.PARAMS.MEDAL_MIN
                                 ] as any,
                                 onChange: (e: any) => {
-                                  onChangeQueries({
+                                  onChangeTempQueries({
                                     [CONSTANT.PARAMS.MEDAL_MIN]: e,
                                   });
                                 },
@@ -996,34 +1031,40 @@ function CategoryFilter() {
                             mainItem: {
                               param: getParamByName(CONSTANT.PARAMS.MEDAL_MAX),
                               attribute: {
-                                value: queries[
+                                value: tempQueries[
                                   CONSTANT.PARAMS.MEDAL_MAX
                                 ] as any,
                                 onChange: (e: any) => {
-                                  onChangeQueries({
+                                  onChangeTempQueries({
                                     [CONSTANT.PARAMS.MEDAL_MAX]: e,
                                   });
                                 },
                               },
                             },
                           },
-                        ].map((item) => (
-                          <GroupInput key={_.uniqueId()} {...item} />
+                        ].map((item, index: number) => (
+                          <GroupInput key={item?.label || index} {...item} />
                         ))}
                         {getParamsByNames([
                           CONSTANT.PARAMS.MEDAL_ID,
                           CONSTANT.PARAMS.MEDAL_OPERATOR_OR,
-                        ]).map((item) => (
-                          <Item
-                            key={_.uniqueId()}
-                            params={item as any}
-                            value={queries[item?.name] as any}
-                            onChange={(e) => {
-                              onChangeQueries({ [item?.name]: e });
-                            }}
-                            className='bg-secondaryCustoms'
-                          />
-                        ))}
+                        ]).map((item, index: number) => {
+                          const param = item;
+                          if (item?.name === CONSTANT.PARAMS.MEDAL_ID)
+                            param.values = medals;
+
+                          return (
+                            <Item
+                              key={item?.name || index}
+                              params={item as any}
+                              value={tempQueries[item?.name] as any}
+                              onChange={(e) => {
+                                onChangeTempQueries({ [item?.name]: e });
+                              }}
+                              className='bg-secondaryCustoms'
+                            />
+                          );
+                        })}
                         {[
                           {
                             label: 'FACEIT level',
@@ -1040,8 +1081,8 @@ function CategoryFilter() {
                               attribute: null,
                             },
                           },
-                        ].map((item) => (
-                          <GroupInput key={_.uniqueId()} {...item} />
+                        ].map((item, index: number) => (
+                          <GroupInput key={item?.label || index} {...item} />
                         ))}
                         {[
                           {
@@ -1049,17 +1090,19 @@ function CategoryFilter() {
                             headItem: {
                               param: getParamByName(CONSTANT.PARAMS.MM_BAN),
                               attribute: {
-                                value: queries[CONSTANT.PARAMS.MM_BAN] as any,
+                                value: tempQueries[
+                                  CONSTANT.PARAMS.MM_BAN
+                                ] as any,
                                 onChange: (e: any) => {
-                                  onChangeQueries({
+                                  onChangeTempQueries({
                                     [CONSTANT.PARAMS.MM_BAN]: e,
                                   });
                                 },
                               },
                             },
                           },
-                        ].map((item) => (
-                          <GroupInput key={_.uniqueId()} {...item} />
+                        ].map((item, index: number) => (
+                          <GroupInput key={item?.label || index} {...item} />
                         ))}
                       </div>
                       <div className='flex flex-col gap-2 rounded-md p-2 bg-primaryCustoms'>
@@ -1071,11 +1114,11 @@ function CategoryFilter() {
                                 CONSTANT.PARAMS.SOLOMMR_MIN
                               ),
                               attribute: {
-                                value: queries[
+                                value: tempQueries[
                                   CONSTANT.PARAMS.SOLOMMR_MIN
                                 ] as any,
                                 onChange: (e: any) => {
-                                  onChangeQueries({
+                                  onChangeTempQueries({
                                     [CONSTANT.PARAMS.SOLOMMR_MIN]: e,
                                   });
                                 },
@@ -1086,11 +1129,11 @@ function CategoryFilter() {
                                 CONSTANT.PARAMS.SOLOMMR_MAX
                               ),
                               attribute: {
-                                value: queries[
+                                value: tempQueries[
                                   CONSTANT.PARAMS.SOLOMMR_MAX
                                 ] as any,
                                 onChange: (e: any) => {
-                                  onChangeQueries({
+                                  onChangeTempQueries({
                                     [CONSTANT.PARAMS.SOLOMMR_MAX]: e,
                                   });
                                 },
@@ -1103,11 +1146,11 @@ function CategoryFilter() {
                                 CONSTANT.PARAMS.D2_GAME_COUNT_MIN
                               ),
                               attribute: {
-                                value: queries[
+                                value: tempQueries[
                                   CONSTANT.PARAMS.D2_GAME_COUNT_MIN
                                 ] as any,
                                 onChange: (e: any) => {
-                                  onChangeQueries({
+                                  onChangeTempQueries({
                                     [CONSTANT.PARAMS.D2_GAME_COUNT_MIN]: e,
                                   });
                                 },
@@ -1118,11 +1161,11 @@ function CategoryFilter() {
                                 CONSTANT.PARAMS.D2_GAME_COUNT_MAX
                               ),
                               attribute: {
-                                value: queries[
+                                value: tempQueries[
                                   CONSTANT.PARAMS.D2_GAME_COUNT_MAX
                                 ] as any,
                                 onChange: (e: any) => {
-                                  onChangeQueries({
+                                  onChangeTempQueries({
                                     [CONSTANT.PARAMS.D2_GAME_COUNT_MAX]: e,
                                   });
                                 },
@@ -1135,11 +1178,11 @@ function CategoryFilter() {
                                 CONSTANT.PARAMS.D2_WIN_COUNT_MIN
                               ),
                               attribute: {
-                                value: queries[
+                                value: tempQueries[
                                   CONSTANT.PARAMS.D2_WIN_COUNT_MIN
                                 ] as any,
                                 onChange: (e: any) => {
-                                  onChangeQueries({
+                                  onChangeTempQueries({
                                     [CONSTANT.PARAMS.D2_WIN_COUNT_MIN]: e,
                                   });
                                 },
@@ -1150,11 +1193,11 @@ function CategoryFilter() {
                                 CONSTANT.PARAMS.D2_WIN_COUNT_MAX
                               ),
                               attribute: {
-                                value: queries[
+                                value: tempQueries[
                                   CONSTANT.PARAMS.D2_WIN_COUNT_MAX
                                 ] as any,
                                 onChange: (e: any) => {
-                                  onChangeQueries({
+                                  onChangeTempQueries({
                                     [CONSTANT.PARAMS.D2_WIN_COUNT_MAX]: e,
                                   });
                                 },
@@ -1168,11 +1211,11 @@ function CategoryFilter() {
                                 CONSTANT.PARAMS.D2_BEHAVIOR_MIN
                               ),
                               attribute: {
-                                value: queries[
+                                value: tempQueries[
                                   CONSTANT.PARAMS.D2_BEHAVIOR_MIN
                                 ] as any,
                                 onChange: (e: any) => {
-                                  onChangeQueries({
+                                  onChangeTempQueries({
                                     [CONSTANT.PARAMS.D2_BEHAVIOR_MIN]: e,
                                   });
                                 },
@@ -1183,11 +1226,11 @@ function CategoryFilter() {
                                 CONSTANT.PARAMS.D2_BEHAVIOR_MAX
                               ),
                               attribute: {
-                                value: queries[
+                                value: tempQueries[
                                   CONSTANT.PARAMS.D2_BEHAVIOR_MAX
                                 ] as any,
                                 onChange: (e: any) => {
-                                  onChangeQueries({
+                                  onChangeTempQueries({
                                     [CONSTANT.PARAMS.D2_BEHAVIOR_MAX]: e,
                                   });
                                 },
@@ -1195,17 +1238,17 @@ function CategoryFilter() {
                             },
                           },
                           {
-                            label: 'Behavior score',
+                            label: 'Last game more',
                             subItem: {
                               param: getParamByName(
                                 CONSTANT.PARAMS.D2_LAST_MATCH_DATE
                               ),
                               attribute: {
-                                value: queries[
+                                value: tempQueries[
                                   CONSTANT.PARAMS.D2_LAST_MATCH_DATE
                                 ] as any,
                                 onChange: (e: any) => {
-                                  onChangeQueries({
+                                  onChangeTempQueries({
                                     [CONSTANT.PARAMS.D2_LAST_MATCH_DATE]: e,
                                   });
                                 },
@@ -1216,11 +1259,11 @@ function CategoryFilter() {
                                 CONSTANT.PARAMS.D2_LAST_MATCH_DATE_PERIOD
                               ),
                               attribute: {
-                                value: queries[
+                                value: tempQueries[
                                   CONSTANT.PARAMS.D2_LAST_MATCH_DATE_PERIOD
                                 ] as any,
                                 onChange: (e: any) => {
-                                  onChangeQueries({
+                                  onChangeTempQueries({
                                     [CONSTANT.PARAMS.D2_LAST_MATCH_DATE_PERIOD]:
                                       e,
                                   });
@@ -1228,8 +1271,8 @@ function CategoryFilter() {
                               },
                             },
                           },
-                        ].map((item) => (
-                          <GroupInput key={_.uniqueId()} {...item} />
+                        ].map((item, index: number) => (
+                          <GroupInput key={item?.label || index} {...item} />
                         ))}
                       </div>
                       <div className='flex flex-col gap-2 rounded-md p-2 bg-primaryCustoms'>
@@ -1241,11 +1284,11 @@ function CategoryFilter() {
                                 CONSTANT.PARAMS.RUST_DEATHS_MIN
                               ),
                               attribute: {
-                                value: queries[
+                                value: tempQueries[
                                   CONSTANT.PARAMS.RUST_DEATHS_MIN
                                 ] as any,
                                 onChange: (e: any) => {
-                                  onChangeQueries({
+                                  onChangeTempQueries({
                                     [CONSTANT.PARAMS.RUST_DEATHS_MIN]: e,
                                   });
                                 },
@@ -1256,11 +1299,11 @@ function CategoryFilter() {
                                 CONSTANT.PARAMS.RUST_DEATHS_MAX
                               ),
                               attribute: {
-                                value: queries[
+                                value: tempQueries[
                                   CONSTANT.PARAMS.RUST_DEATHS_MAX
                                 ] as any,
                                 onChange: (e: any) => {
-                                  onChangeQueries({
+                                  onChangeTempQueries({
                                     [CONSTANT.PARAMS.RUST_DEATHS_MAX]: e,
                                   });
                                 },
@@ -1273,11 +1316,11 @@ function CategoryFilter() {
                                 CONSTANT.PARAMS.RUST_KILLS_MIN
                               ),
                               attribute: {
-                                value: queries[
+                                value: tempQueries[
                                   CONSTANT.PARAMS.RUST_KILLS_MIN
                                 ] as any,
                                 onChange: (e: any) => {
-                                  onChangeQueries({
+                                  onChangeTempQueries({
                                     [CONSTANT.PARAMS.RUST_KILLS_MIN]: e,
                                   });
                                 },
@@ -1288,19 +1331,19 @@ function CategoryFilter() {
                                 CONSTANT.PARAMS.RUST_KILLS_MAX
                               ),
                               attribute: {
-                                value: queries[
+                                value: tempQueries[
                                   CONSTANT.PARAMS.RUST_KILLS_MAX
                                 ] as any,
                                 onChange: (e: any) => {
-                                  onChangeQueries({
+                                  onChangeTempQueries({
                                     [CONSTANT.PARAMS.RUST_KILLS_MAX]: e,
                                   });
                                 },
                               },
                             },
                           },
-                        ].map((item) => (
-                          <GroupInput key={_.uniqueId()} {...item} />
+                        ].map((item, index: number) => (
+                          <GroupInput key={item?.label || index} {...item} />
                         ))}
                       </div>
                     </>
@@ -1332,13 +1375,6 @@ function CategoryFilter() {
                     </>
                   )}
                 </Button>
-
-                <Button variant={'ghost'} onClick={onResetActionClick}>
-                  Reset
-                  <span>
-                    <X />
-                  </span>
-                </Button>
               </div>
               <div className='w-full order-1 lg:order-1'>
                 <Button variant={'secondary'} className='w-full'>
@@ -1358,9 +1394,7 @@ function CategoryFilter() {
                 </Button>
               </div>
             </div>
-            <div className='flex items-center gap-2'>
-              {getOrderByFilters()}
-            </div>
+            <div className='flex items-center gap-2'>{getOrderByFilters()}</div>
           </div>
         </div>
       </div>

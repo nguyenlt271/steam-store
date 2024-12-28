@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Input as InputBase } from "@/components/ui/input";
-import React from "react";
+import { Input as InputBase } from '@/components/ui/input';
+import React from 'react';
 
 interface IProps {
   label?: string;

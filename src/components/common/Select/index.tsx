@@ -7,10 +7,11 @@ import {
   Select as SelectProvider,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import CONSTANT from "@/variables/constant";
-import { IOption } from "@/variables/interface";
-import { uniqueId } from "lodash";
+} from '@/components/ui/select';
+import CONSTANT from '@/variables/constant';
+import { IOption } from '@/variables/interface';
+import { uniqueId } from 'lodash';
+import Image from 'next/image';
 
 interface IProps {
   label: string;
@@ -29,7 +30,7 @@ function Select({ label, options, ...props }: IProps) {
   return (
     <SelectProvider onValueChange={props.onChange} value={props.value}>
       <SelectTrigger className={`w-full ${props?.className}`}>
-        <SelectValue placeholder={label || ""} />
+        <SelectValue placeholder={label || ''} />
       </SelectTrigger>
       <SelectContent>
         <SelectGroup>
@@ -38,9 +39,22 @@ function Select({ label, options, ...props }: IProps) {
             return (
               <SelectItem
                 key={option?.value || option || uniqueId()}
-                value={option?.value || option || "none"}
+                value={option?.value || option || 'none'}
               >
-                {getLabel(option?.label || option?.value || option)}
+                <div className='flex items-center gap-2'>
+                  {option?.image && (
+                    <div className='relative w-5 h-5'>
+                      <Image
+                        className='w-full h-full object-cover'
+                        src={option.image}
+                        fill
+                        alt='image-select'
+                      />
+                    </div>
+                  )}
+                  {option?.title ||
+                    getLabel(option?.label || option?.value || option)}
+                </div>
               </SelectItem>
             );
           })}
