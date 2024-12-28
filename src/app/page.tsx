@@ -1,5 +1,5 @@
 import HomeModule from '@/module/home';
-// export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic';
 
 async function getParams() {
   const res = await fetch(
@@ -28,6 +28,8 @@ export const generateMetadata = async () => {
 };
 
 export default async function Home() {
+  if (!process.env.NEXT_PUBLIC_API_URL) return;
+
   const respGames = await getGames();
   const respParams = await getParams();
 
