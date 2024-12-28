@@ -1,5 +1,5 @@
 import HomeModule from '@/module/home';
-import { Suspense } from 'react';
+export const dynamic = 'force-dynamic';
 
 async function getParams() {
   const res = await fetch(`http://localhost:3000/api/category/params`, {
@@ -28,9 +28,5 @@ export default async function Home() {
   const respGames = await getGames();
   const respParams = await getParams();
 
-  return (
-    <Suspense>
-      <HomeModule games={respGames?.games} params={respParams} />
-    </Suspense>
-  );
+  return <HomeModule games={respGames?.games} params={respParams} />;
 }
