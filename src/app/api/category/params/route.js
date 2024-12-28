@@ -1,9 +1,5 @@
 import axios from 'axios';
 import { NextResponse } from 'next/server';
-
-
-import axios from 'axios';
-import { NextResponse } from 'next/server';
 import NodeCache from 'node-cache';
 import React from 'react';
 
