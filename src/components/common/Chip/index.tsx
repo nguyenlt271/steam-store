@@ -1,31 +1,32 @@
-import { cva, type VariantProps } from "class-variance-authority";
-import * as React from "react";
+import { cva, type VariantProps } from 'class-variance-authority';
+import * as React from 'react';
 
-import { cn } from "@/lib/utils";
+import { cn } from '@/lib/utils';
 
 const chipVariants = cva(
-  "inline-flex items-center justify-center gap-2 text-sm font-bold whitespace-nowrap rounded-full transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 cursor-pointer",
+  'inline-flex items-center justify-center gap-2 text-sm font-bold whitespace-nowrap rounded-full transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 cursor-pointer',
   {
     variants: {
       variant: {
-        default: "bg-primaryCustoms shadow hover:bg-primaryCustoms/90",
+        default: 'bg-primaryCustoms shadow hover:bg-primaryCustoms/90',
         success:
-          "bg-green-500/10 text-green-500 shadow-sm hover:bg-green-500/20",
-        error: "bg-red-500/10 text-red-500 shadow-sm hover:bg-red-500/20",
+          'bg-green-500/10 text-greenCustoms-500 shadow-sm hover:bg-green-500/20',
+        error:
+          'bg-red-500/10 text-redCustoms-500 shadow-sm hover:bg-red-500/20',
         warning:
-          "bg-yellow-500/10 text-yellow-500 shadow-sm hover:bg-yellow-500/20",
-        info: "hover:text-white",
+          'bg-yellow-500/10 text-yellow-500 shadow-sm hover:bg-yellow-500/20',
+        info: 'hover:text-white',
       },
       size: {
-        default: "h-8 p-2 ",
-        sm: "h-8 rounded-md px-3 text-xs",
-        lg: "h-10 rounded-md px-8",
-        icon: "h-9 w-9",
+        default: 'h-8 p-2 ',
+        sm: 'h-8 rounded-md px-3 text-xs',
+        lg: 'h-10 rounded-md px-8',
+        icon: 'h-9 w-9',
       },
     },
     defaultVariants: {
-      variant: "default",
-      size: "default",
+      variant: 'default',
+      size: 'default',
     },
   }
 );
@@ -47,6 +48,6 @@ const Chip = React.forwardRef<HTMLDivElement, ChipProps>(
     );
   }
 );
-Chip.displayName = "Chip";
+Chip.displayName = 'Chip';
 
 export default Chip;

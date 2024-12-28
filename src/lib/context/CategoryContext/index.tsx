@@ -156,10 +156,10 @@ type CategoryContextType = {
 };
 
 type CategoryProviderType = {
-  children: ReactNode;
-  initCategories: ICategory[];
-  initGames: IGame[];
-  initParams: any;
+  children?: ReactNode;
+  initCategories?: ICategory[];
+  initGames?: IGame[];
+  initParams?: any;
 };
 
 const CategoryContext = createContext<CategoryContextType | undefined>(

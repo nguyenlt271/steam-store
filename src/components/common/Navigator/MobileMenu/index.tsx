@@ -86,7 +86,7 @@ function MobileMenu() {
       <Button variant='secondary' onClick={onToggle}>
         <Menu />
       </Button>
-      <div className={`fixed inset-0 h-full w-full z-50 flex  transition-transform duration-300 ease-in-out  ${active ? '-translate-x-[100%]' : 'translate-x-0 '}`}>
+      <div className={`fixed inset-0 h-full w-full z-50 flex  transition-transform duration-300 ease-in-out  ${!active ? '-translate-x-[100%]' : 'translate-x-0 '}`}>
         <div className='py-6 p-2 w-4/5 flex flex-col gap-4 bg-secondaryCustoms text-primaryCustoms'>
           <Input placeholder='Search...' onChange={() => null} />
           <Command className='rounded-lg bg-secondaryCustoms unset max-h-full'>

@@ -20,6 +20,8 @@ module.exports = {
         primaryCustoms: '#1f8e5c',
         secondaryCustoms: '#288c60',
         thirdCustoms: "#089578",
+        greenCustoms: '#1f8e5c',
+        redCustoms: '#e06667',
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
         card: {
@@ -79,6 +81,9 @@ module.exports = {
       },
       ringColor: {
         primaryCustoms: "#1f8e5c"
+      },
+      fontSize: {
+        md: '14px'
       }
     }
   },
