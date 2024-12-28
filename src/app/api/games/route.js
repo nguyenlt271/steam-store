@@ -26,6 +26,6 @@ export const GET = React.cache(async () => {
     return NextResponse.json(resp?.data);
   } catch (err) {
     console.error(err);
-    return NextResponse.json([]);
+    return NextResponse.json({});
   }
 });

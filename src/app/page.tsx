@@ -1,4 +1,5 @@
 import HomeModule from '@/module/home';
+import { isEmpty } from 'lodash';
 export const dynamic = 'force-dynamic';
 
 async function getParams() {
@@ -32,6 +33,11 @@ export default async function Home() {
 
   const respGames = await getGames();
   const respParams = await getParams();
+
+  console.log('respGames', respGames);
+  console.log('respParams', respParams);
+
+  if (isEmpty(respGames) || isEmpty(respParams)) return;
 
   return <HomeModule games={respGames?.games} params={respParams} />;
 }
