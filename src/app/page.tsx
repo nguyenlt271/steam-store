@@ -34,6 +34,7 @@ export default async function Home() {
   const respGames = await getGames();
   const respParams = await getParams();
 
+  // Logs using to check current data - remove it if you don't need
   console.log('respGames', respGames);
   console.log('respParams', respParams);
 
