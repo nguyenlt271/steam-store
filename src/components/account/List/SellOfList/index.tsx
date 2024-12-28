@@ -26,7 +26,7 @@ const SellOfList = () => {
   const getData = async (queries: any) => {
     try {
       onChangeCommon({ loading: true });
-      const res = await axios.get(`http://localhost:3000/api/accounts`, {
+      const res = await axios.get(`/api/accounts`, {
         params: queries,
       });
       setAccounts(res?.data?.items);

@@ -1,16 +1,19 @@
 import HomeModule from '@/module/home';
-export const dynamic = 'force-dynamic';
+// export const dynamic = 'force-dynamic';
 
 async function getParams() {
-  const res = await fetch(`http://localhost:3000/api/category/params`, {
-    cache: 'force-cache',
-  });
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/category/params`,
+    {
+      cache: 'force-cache',
+    }
+  );
   const resp = await res.json();
   return resp;
 }
 
 async function getGames() {
-  const res = await fetch(`http://localhost:3000/api/games`, {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/games`, {
     cache: 'force-cache',
   });
   const resp = await res.json();
