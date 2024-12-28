@@ -1,3 +1,5 @@
+'use client';
+
 import HeaderLg from './HeaderLg';
 import HeaderSm from './HeaderSm';
 
