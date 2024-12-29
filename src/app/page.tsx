@@ -38,7 +38,13 @@ export default async function Home() {
   console.log('respGames', respGames);
   console.log('respParams', respParams);
 
-  if (isEmpty(respGames) || isEmpty(respParams)) return;
+  if (
+    isEmpty(respGames) ||
+    isEmpty(respParams) ||
+    respGames.length === 0 ||
+    respParams.length === 0
+  )
+    return;
 
   return <HomeModule games={respGames?.games} params={respParams} />;
 }

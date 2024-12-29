@@ -12,6 +12,8 @@ export const GET = React.cache(async () => {
       return NextResponse.json(cachedData);
     }
 
+    console.log('Fetching params data');
+
     const resp = await axios.get(
       `https://api.lzt.market/steam/params`,
       {
@@ -26,7 +28,6 @@ export const GET = React.cache(async () => {
     return NextResponse.json(resp?.data);
   } catch (err) {
     console.log('Error when fetching params data', err);
-    console.error(err);
     return NextResponse.json({});
   }
 });
