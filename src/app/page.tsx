@@ -6,7 +6,7 @@ async function getParams() {
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_API_URL}/api/category/params`,
     {
-      cache: 'force-cache',
+      cache: 'no-store',
     }
   );
   const resp = await res.json();
@@ -15,7 +15,7 @@ async function getParams() {
 
 async function getGames() {
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/games`, {
-    cache: 'force-cache',
+    cache: 'no-store',
   });
   const resp = await res.json();
   return resp;
