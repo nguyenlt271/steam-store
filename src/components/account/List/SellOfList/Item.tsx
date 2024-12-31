@@ -106,11 +106,14 @@ function Item({ account }: IProps) {
     });
   };
 
+  console.log('account', account);
+
+
   return (
     <Card>
       <CardHeader className="p-4 pb-0">
         <CardTitle className="flex justify-between">
-          <Link href={"/"} className="text-sm font-semibold">
+          <Link href={`/${account?.item_id}`} className="text-sm font-semibold">
             {account?.title_en} | {account?.steam_country}
           </Link>
           <p className="flex items-center text-md font-semibold text-white h-7 p-4 rounded-md bg-gradient-to-r from-primaryCustoms to-primaryCustoms/50">
